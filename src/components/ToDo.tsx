@@ -1,6 +1,7 @@
 import React from "react";
 import { useSetRecoilState } from "recoil";
 import { Categories, IToDo, toDoState } from "../atoms";
+import { setItem } from "../lib/storage";
 
 function ToDo({ text, category, id }: IToDo) {
   const setToDos = useSetRecoilState(toDoState);
@@ -11,12 +12,24 @@ function ToDo({ text, category, id }: IToDo) {
     setToDos((oldToDos) => {
       const targetIndex = oldToDos.findIndex((toDo) => toDo.id === id);
       const newToDo = { text, id, category: name as any };
-
-      return [
+      const newToDos = [
         ...oldToDos.slice(0, targetIndex),
         newToDo,
         ...oldToDos.slice(targetIndex + 1),
       ];
+      setItem("toDo", newToDos);
+      return newToDos;
+    });
+  };
+  const onDeleteClick = () => {
+    setToDos((oldToDos) => {
+      const targetIndex = oldToDos.findIndex((toDo) => toDo.id === id);
+      const newToDos = [
+        ...oldToDos.slice(0, targetIndex),
+        ...oldToDos.slice(targetIndex + 1),
+      ];
+      setItem("toDo", newToDos);
+      return newToDos;
     });
   };
 
@@ -38,6 +51,9 @@ function ToDo({ text, category, id }: IToDo) {
           Done
         </button>
       )}
+      <button name={Categories.DELETE} onClick={onDeleteClick}>
+        X
+      </button>
     </li>
   );
 }
